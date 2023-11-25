@@ -11,26 +11,33 @@
 typedef unsigned int bool;
 
 typedef struct PointI {
-    int row, column;
+    int x, y;
 } PointI;
 
 typedef struct SizeI {
-    int height, width;
+    int width, height;
 } SizeI;
 
-typedef struct Viewport {
-    PointI lowerLeft;
+typedef struct PointF {
+    int x, y;
+} PointF;
+
+typedef struct SizeF {
+    int width, height;
+} SizeF;
+
+typedef struct Window {
+    char* title;
     SizeI size;
-} Viewport;
+    int id;
+} Window;
 
 typedef struct Game {
     long time;
     int speed;
     bool paused;
     bool exit;
-    Viewport viewport;
-    int windowId;
-    SizeI windowSize;
+    Window window;
 } Game;
 
 Game GAME;
@@ -64,16 +71,12 @@ void keyboardCallack(unsigned char key, int x, int y) {
 
 void idleCallback() {
     if (GAME.exit) {
-        glutDestroyWindow(GAME.windowId);
+        glutDestroyWindow(GAME.window.id);
         exit(0);
     }
 }
 
 void mouseMoveCallback(int x, int y) {
-}
-
-void setViewport(Viewport* v) {
-    glViewport(v->lowerLeft.column, v->lowerLeft.row, v->size.width, v->size.height);
 }
 
 void display() {
@@ -82,11 +85,12 @@ void display() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(0, GAME.windowSize.width, 0, GAME.windowSize.height, -1, 1); // Set orthographic projection with viewport
-    setViewport(&(GAME.viewport));
-    
+    glOrtho(0, GAME.window.size.width, 0, GAME.window.size.height, -1, 1); // Set orthographic projection with viewport
+   
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    // Place the code to render your game here.
 
     glFlush();
     glutSwapBuffers();
@@ -95,14 +99,13 @@ void display() {
 void initGraphics(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(GAME.windowSize.width, GAME.windowSize.height);
-    GAME.windowId = glutCreateWindow("Game");
+    glutInitWindowSize(GAME.window.size.width, GAME.window.size.height);
+    GAME.window.id = glutCreateWindow(GAME.window.title);
     glutTimerFunc(GAME.speed, tick, 0);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboardCallack);
     glutIdleFunc(idleCallback);
     glutPassiveMotionFunc(mouseMoveCallback);
-    GAME.viewport = (Viewport){(PointI){0, 0}, (SizeI){GAME.windowSize.height, GAME.windowSize.width}};
 }
 
 void run() {
@@ -115,6 +118,8 @@ void initWorld() {
 
 int main(int argc, char** argv) {
     GAME = (Game) {};
+    GAME.window.title = "Sample game";
+    GAME.window.size = (SizeI) {800, 600};
     initWorld();
     initGraphics(argc, argv);
     run();
