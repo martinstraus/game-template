@@ -66,7 +66,6 @@ void keyboardCallack(unsigned char key, int x, int y) {
             GAME.exit = true;
             break;
     }
-    //printf("Key pressed: %d\n", key);
 }
 
 void idleCallback() {
@@ -82,30 +81,27 @@ void mouseMoveCallback(int x, int y) {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    glOrtho(0, GAME.window.size.width, 0, GAME.window.size.height, -1, 1); // Set orthographic projection with viewport
-   
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
     // Place the code to render your game here.
 
-    glFlush();
     glutSwapBuffers();
 }
 
-void initGraphics(int argc, char** argv) {
-    glutInit(&argc, argv);
+void initGraphics() {
+    int argc = 0;
+    glutInit(&(argc), NULL);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(GAME.window.size.width, GAME.window.size.height);
     GAME.window.id = glutCreateWindow(GAME.window.title);
+    // Set orthographic projection with viewport
+    gluOrtho2D(0, GAME.window.size.width, 0, GAME.window.size.height); 
+
     glutTimerFunc(GAME.speed, tick, 0);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboardCallack);
     glutIdleFunc(idleCallback);
     glutPassiveMotionFunc(mouseMoveCallback);
+
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void run() {
@@ -121,7 +117,7 @@ int main(int argc, char** argv) {
     GAME.window.title = "Sample game";
     GAME.window.size = (SizeI) {800, 600};
     initWorld();
-    initGraphics(argc, argv);
+    initGraphics();
     run();
     return 0;
 }
